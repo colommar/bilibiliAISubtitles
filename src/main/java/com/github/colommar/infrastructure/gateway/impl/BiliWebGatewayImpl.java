@@ -105,6 +105,7 @@ public class BiliWebGatewayImpl implements BiliWebGateway {
         headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
         headers.put("Referer", "https://www.bilibili.com/");
         headers.put("Cookie", "SESSDATA=" + sessdata);
+        log.info("Headers: {}", headers);
         return headers;
     }
     

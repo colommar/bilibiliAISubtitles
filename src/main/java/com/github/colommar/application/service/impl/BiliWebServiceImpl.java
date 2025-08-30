@@ -26,15 +26,15 @@ public class BiliWebServiceImpl implements BiliWebService {
             // 参数校验
             Validate.notBlank(bvid, "视频BV号不能为空");
             
-            log.info("开始获取视频AI摘要，BV号: {}", bvid);
+            log.info("Starting to retrieve video AI summary, BV ID: {}", bvid);
             
             AISummaryResponse response = biliWebDomainService.getAISummary(bvid);
             
-            log.info("成功获取视频AI摘要");
+            log.info("Successfully retrieved video AI summary");
             return response;
             
         } catch (Exception e) {
-            log.error("获取视频AI摘要失败: {}", e.getMessage(), e);
+            log.error("Failed to retrieve video AI summary: {}", e.getMessage(), e);
             throw e;
         }
     }

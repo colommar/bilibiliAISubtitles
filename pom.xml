@@ -50,5 +50,59 @@
 
     </dependencies>
 
+    <build>
+    <plugins>
+        <!-- 1. 用 shade 打包可执行 JAR -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.5.0</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <mainClass>com.github.colommar.application.BiliWebApplication</mainClass>
+                            </transformer>
+                        </transformers>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+        <!-- 2. Launch4j 打包成 EXE -->
+        <plugin>
+            <groupId>com.akathist.maven.plugins.launch4j</groupId>
+            <artifactId>launch4j-maven-plugin</artifactId>
+            <version>1.7.25</version>
+            <executions>
+                <execution>
+                    <id>launch4j</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>launch4j</goal>
+                    </goals>
+                    <configuration>
+                        <jar>${project.build.directory}/${project.build.finalName}.jar</jar>
+                        <outfile>${project.build.directory}/${project.build.finalName}.exe</outfile>
+                        <headerType>console</headerType>
+                        <cmdLine></cmdLine>
+                        <dontWrapJar>false</dontWrapJar>
+                        <jre>
+                            <minVersion>1.8.0</minVersion>
+                        </jre>
+                         <icon></icon>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+
+
 
 </project>

@@ -14,10 +14,32 @@ public class ConfigLoader {
     
     private static final String CONFIG_FILE = "config.properties";
     
+    // 命令行参数值
+    private static String argsSessdata;
+    private static String argsVideoId;
+    private static Boolean argsIsTimeDetailOn;
+    private static Boolean argsIsFileOutput;
+    private static boolean useArgs = false;
+    
+    /**
+     * 设置命令行参数值
+     */
+    public static void setArgsValues(String sessdata, String videoId, Boolean isTimeDetailOn, Boolean isFileOutput) {
+        ConfigLoader.argsSessdata = sessdata;
+        ConfigLoader.argsVideoId = videoId;
+        ConfigLoader.argsIsTimeDetailOn = isTimeDetailOn;
+        ConfigLoader.argsIsFileOutput = isFileOutput;
+        ConfigLoader.useArgs = true;
+    }
+    
     /**
      * 从配置文件加载SESSDATA
      */
     public static String loadSessdataFromConfig() throws IOException {
+        if (useArgs && argsSessdata != null) {
+            return argsSessdata;
+        }
+        
         Properties properties = loadProperties();
         String sessdata = properties.getProperty("sessdata");
         if (sessdata == null || sessdata.trim().isEmpty()) {
@@ -30,6 +52,10 @@ public class ConfigLoader {
      * 从配置文件加载视频ID
      */
     public static String loadVideoIdFromConfig() throws IOException {
+        if (useArgs && argsVideoId != null) {
+            return argsVideoId;
+        }
+        
         Properties properties = loadProperties();
         String videoId = properties.getProperty("videoId");
         if (videoId == null || videoId.trim().isEmpty()) {
@@ -42,6 +68,10 @@ public class ConfigLoader {
      * 从配置文件加载是否显示时间详情
      */
     public static boolean loadIsTimeDetailOnFromConfig() throws IOException {
+        if (useArgs && argsIsTimeDetailOn != null) {
+            return argsIsTimeDetailOn;
+        }
+        
         Properties properties = loadProperties();
         String isTimeDetailOn = properties.getProperty("isTimeDetailOn");
         if (isTimeDetailOn == null || isTimeDetailOn.trim().isEmpty()) {
@@ -62,6 +92,10 @@ public class ConfigLoader {
      * 从配置文件加载是否输出到文件
      */
     public static boolean loadIsFileOutputFromConfig() throws IOException {
+        if (useArgs && argsIsFileOutput != null) {
+            return argsIsFileOutput;
+        }
+        
         Properties properties = loadProperties();
         String isFileOutput = properties.getProperty("isFileOutput");
         if (isFileOutput == null || isFileOutput.trim().isEmpty()) {

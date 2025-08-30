@@ -22,16 +22,16 @@ public class BiliWebDomainServiceImpl implements BiliWebDomainService {
     
     @Override
     public AISummaryResponse getAISummary(String bvid) throws Exception {
-        log.info("领域服务开始处理AI摘要请求，BV号: {}", bvid);
+        log.info("Domain service starting to process AI summary request, BV ID: {}", bvid);
         
         VideoDetails videoDetails = biliWebGateway.getVideoDetails(bvid);
-        log.debug("获取视频详情成功，CID: {}, UP主ID: {}", videoDetails.getCid(), videoDetails.getUpMid());
+        log.debug("Successfully retrieved video details, CID: {}, UP ID: {}", videoDetails.getCid(), videoDetails.getUpMid());
         
         WbiKeys wbiKeys = biliWebGateway.getWbiKeys();
-        log.debug("获取WBI密钥成功");
+        log.debug("Successfully retrieved WBI keys");
         
         AISummaryResponse response = biliWebGateway.getAISummary(bvid, videoDetails, wbiKeys);
-        log.info("获取AI摘要成功");
+        log.info("Successfully retrieved AI summary");
         
         return response;
     }

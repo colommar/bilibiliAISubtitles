@@ -19,16 +19,52 @@ import java.util.Date;
 public class BiliWebApplication {
     
     public static void main(String[] args) {
+        for(String arg : args) {
+            if(arg.equalsIgnoreCase("-h") || arg.equalsIgnoreCase("--help")) {
+                printHelp();
+                System.exit(0);
+            }
+        }
+
         try {
-            log.info("启动B站AI字幕应用...");
+            printBanner();
+            log.info("Starting Bilibili AI Subtitles application...");
             
-            // 加载配置
-            String sessdata = ConfigLoader.loadSessdataFromConfig();
-            String videoId = ConfigLoader.loadVideoIdFromConfig();
-            boolean isTimeDetailOn = ConfigLoader.loadIsTimeDetailOnFromConfig();
-            boolean isFileOutput = ConfigLoader.loadIsFileOutputFromConfig();
+            // 检查是否通过命令行参数运行
+            boolean useArgs = args.length >= 2;
             
-            log.info("配置加载完成 - SESSDATA: {}, VideoId: {}, 时间详情: {}, 文件输出: {}", 
+            String sessdata;
+            String videoId;
+            boolean isTimeDetailOn;
+            boolean isFileOutput;
+            
+            if (useArgs) {
+                // 解析命令行参数
+                sessdata = args[0].trim();
+                videoId = args[1].trim();
+                
+                if (args.length == 2) {
+                    isFileOutput = true;
+                    isTimeDetailOn = false;
+                } else if (args.length == 3) {
+                    isFileOutput = Boolean.parseBoolean(args[2]);
+                    isTimeDetailOn = false;
+                } else {
+                    isFileOutput = Boolean.parseBoolean(args[2]);
+                    isTimeDetailOn = Boolean.parseBoolean(args[3]);
+                }
+                
+                // 设置命令行参数值到ConfigLoader
+                ConfigLoader.setArgsValues(sessdata, videoId, isTimeDetailOn, isFileOutput);
+            } else {
+                // 从配置文件加载
+                sessdata = ConfigLoader.loadSessdataFromConfig();
+                videoId = ConfigLoader.loadVideoIdFromConfig();
+                isTimeDetailOn = ConfigLoader.loadIsTimeDetailOnFromConfig();
+                isFileOutput = ConfigLoader.loadIsFileOutputFromConfig();
+            }
+            
+            log.info("Configuration loaded successfully - SESSDATA: {}, VideoId: {}, Time Detail: {}, File Output: {}", 
                     sessdata.substring(0, Math.min(10, sessdata.length())) + "...", 
                     videoId, isTimeDetailOn, isFileOutput);
             
@@ -37,7 +73,7 @@ public class BiliWebApplication {
             AISummaryResponse response = biliWebService.getAISummary(videoId);
 
             if (response.getData() != null && response.getData().getModel_result() != null) {
-                log.info("获取AI摘要成功");
+                log.info("AI summary retrieved successfully");
                 
                 outputToConsole(response, isTimeDetailOn);
                 
@@ -45,31 +81,65 @@ public class BiliWebApplication {
                     outputToFile(response, videoId, isTimeDetailOn);
                 }
             } else {
-                log.warn("未获取到摘要数据");
+                log.warn("No summary data retrieved");
             }
             
-            log.info("应用执行完成");
+            log.info("Application execution completed");
             
         } catch (Exception e) {
-            log.error("应用执行失败: {}", e.getMessage(), e);
+            log.error("Application execution failed: {}", e.getMessage(), e);
             System.exit(1);
         }
     }
-    
+
+    private static void printBanner() {
+        System.out.println("             ,--.                                           \n" +
+                " ,---. ,---. |  | ,---. ,--,--,--.,--,--,--. ,--,--.,--.--. \n" +
+                "| .--'| .-. ||  || .-. ||        ||        |' ,-.  ||  .--' \n" +
+                "\\ `--.' '-' '|  |' '-' '|  |  |  ||  |  |  |\\ '-'  ||  |    \n" +
+                " `---' `---' `--' `---' `--`--`--'`--`--`--' `--`--'`--'    \n" +
+                "                                                           ");
+    }
+
+    // 显示帮助函数
+    public static void printHelp() {
+        printBanner();
+        System.out.println("Usage:");
+        System.out.println("  myapp.exe <sessdata> <videoId> [isTimeDetailOn] [isFileOutput]");
+        System.out.println();
+        System.out.println("Arguments:");
+        System.out.println("  sessdata        (required) Your session data");
+        System.out.println("  videoId         (required) Video ID to process");
+        System.out.println("  isFileOutput    (optional) true/false, default from config(true)");
+        System.out.println("  isTimeDetailOn  (optional) true/false, default from config(false)");
+        System.out.println();
+        System.out.println("Examples:");
+        System.out.println("  myapp.exe abc123 xyz789");
+        System.out.println("      -> uses default isFileOutput and isTimeDetailOn from config");
+        System.out.println("  myapp.exe abc123 xyz789 true");
+        System.out.println("      -> overrides isFileOutput, uses default isTimeDetailOn");
+        System.out.println("  myapp.exe abc123 xyz789 false true");
+        System.out.println("      -> overrides both optional parameters");
+        System.out.println("  myapp.exe -h");
+        System.out.println("      -> shows this help message");
+        System.out.println();
+        System.out.println("Project URL: https://github.com/colommar/bilibiliAISubtitles");
+    }
+
     /**
      * 输出到控制台
      */
     private static void outputToConsole(AISummaryResponse response, boolean isTimeDetailOn) {
-        System.out.println("获取AI摘要成功");
-        System.out.println("摘要: " + response.getData().getModel_result().getSummary());
+        System.out.println("AI summary retrieved successfully");
+        System.out.println("Summary: " + response.getData().getModel_result().getSummary());
         
-        // 输出大纲
-        System.out.println("\n=== 视频大纲 ===");
+        // Output outline
+        System.out.println("\n=== Video Outline ===");
         for (AISummaryResponse.Outline outline : response.getData().getModel_result().getOutline()) {
             if (isTimeDetailOn) {
-                System.out.println("标题: " + outline.getTitle() + " (时间戳: " + outline.getTimestamp() + "s)");
+                System.out.println("Title: " + outline.getTitle() + " (Timestamp: " + outline.getTimestamp() + "s)");
             } else {
-                System.out.println("标题: " + outline.getTitle());
+                System.out.println("Title: " + outline.getTitle());
             }
             for (AISummaryResponse.PartOutline part : outline.getPart_outline()) {
                 if (isTimeDetailOn) {
